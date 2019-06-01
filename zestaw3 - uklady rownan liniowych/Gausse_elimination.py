@@ -1,4 +1,7 @@
-def gausse_elimination(n, A, B, X):
+import numpy as np
+
+
+def gausse_elimination(n, A, B):
     xmult = 0
     sum = 0
 
@@ -11,6 +14,8 @@ def gausse_elimination(n, A, B, X):
 
             B[j] = B[j] - (xmult)*B[i]
 
+    X = [0, 0, 0]
+
     X[n-1] = B[n-1]/A[n-1][n-1]
     for i in range(n-2, -1, -1):
         sum = B[i]
@@ -20,53 +25,65 @@ def gausse_elimination(n, A, B, X):
     return X
 
 
-def gausse_elimination_with_pivoting(n, A, B):
+def gausse_elimination_with_pivoting(n, A, B, T):
     xmult = 0
     rmax = 0
     smax = 0
     r = 0
-    S = [0,0,0]
+    S = np.zeros((1, n))
     j = 0
 
     for i in range(0, n):
-        B[i] = i
+        T[i] = i
         smax = 0
-        for j in range(0,n):
-            smax = max(smax,abs(A[i][j]))
-        S[i] = smax
+        for j in range(0, n):
+            smax = max(smax, abs(A[i][j]))
+        S[0][i] = smax
 
     for k in range(0, n-1):
         rmax = 0
         for i in range(k, n):
-            r = abs(A[B[i]][k]/S[B[i]])
+            r = abs(A[T[i]][k]/S[0][T[i]])
             if r > rmax:
                 rmax = r
                 j = i
-        tmp = B[j]
-        B[j] = B[k]
-        B[k] = tmp
+        tmp = T[j]
+        T[j] = T[k]
+        T[k] = tmp
 
         for i in range(k+1, n):
-            xmult = A[B[i]][k]/A[B[k]][k]
-            A[B[i]][k] = xmult
+            xmult = A[T[i]][k] / A[T[k]][k]
+            #A[T[i]][k] = xmult
             for j in range(k+1, n):
-                A[B[i]][j] = A[B[i]][j] - xmult*A[B[k]][j]
+                A[T[i]][j] = A[T[i]][j] - xmult*A[T[k]][j]
+
+    for k in range(0, n-1):
+        for i in range(k+1, n):
+            B[T[i]] = B[T[i]] - (A[T[i][k]] * B[T[k]])
+
+    X = [0, 0, 0]
+
+    X[n - 1] = B[T[n-1]] / A[T[n-1]][n - 1]
+    for i in range(n - 2, -1, -1):
+        sum = B[T[i]]
+        for j in range(i + 1, n):
+            sum = sum - A[T[i]][j] * X[j]
+        X[i] = sum / A[T[i]][i]
+    return X
 
 
 n = 3
 A = [[2, 3, 4], [1, 2, 3], [5, 7, 7]]
 A1 = [[2, 3, 4], [1, 2, 3], [5, 7, 7]]
 B = [8, 9, 10]
-X = [0, 0, 0]
+B1 = [8, 9, 10]
 
 L = [0, 1, 2]
 
-X = gausse_elimination(n, A, B, X)
+X = gausse_elimination(n, A, B)
 print(X)
-gausse_elimination_with_pivoting(n, A1, L)
-print(A1)
-print("")
-print(L)
+X1 = gausse_elimination_with_pivoting(n, A1, B1, L)
+print(X1)
 
 
 
